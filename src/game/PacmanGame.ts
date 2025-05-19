@@ -35,7 +35,8 @@ class PacmanGame {
     
     // Create canvas
     this.canvas = document.createElement('canvas');
-    this.canvas.className = 'w-full h-full';
+    this.canvas.style.width = '100%';
+    this.canvas.style.height = '100%';
     this.container.appendChild(this.canvas);
     
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -47,20 +48,22 @@ class PacmanGame {
     this.xmrImage = new Image();
     this.xmrImage.onload = () => {
       this.xmrImageLoaded = true;
+      this.render();
     };
-    this.xmrImage.src = 'https://raw.githubusercontent.com/monero-ecosystem/monero-gui/master/images/monero.png';
+    this.xmrImage.src = '/src/game/xmr.png';
     
     this.qubicImage = new Image();
     this.qubicImage.onload = () => {
       this.qubicImageLoaded = true;
+      this.render();
     };
-    this.qubicImage.src = 'https://raw.githubusercontent.com/qubic-li/client/master/src/main/resources/images/qubic_logo.png';
+    this.qubicImage.src = '/src/game/qubic.png';
     
     // Initialize game objects
     this.qubic = {
       x: this.canvas.width / 2,
       y: this.canvas.height / 2,
-      size: 30,
+      size: 20,
       color: '#00F0FF',
       direction: { x: 0, y: 0 },
       speed: 200
@@ -79,8 +82,15 @@ class PacmanGame {
   }
   
   private resize() {
-    this.canvas.width = this.container.clientWidth;
-    this.canvas.height = this.container.clientHeight;
+    const rect = this.container.getBoundingClientRect();
+    this.canvas.width = rect.width;
+    this.canvas.height = rect.height;
+    
+    // Update Qubic position after resize
+    this.qubic.x = this.canvas.width / 2;
+    this.qubic.y = this.canvas.height / 2;
+    
+    this.render();
   }
   
   private generateBlocks(count: number) {
@@ -88,7 +98,7 @@ class PacmanGame {
       this.blocks.push({
         x: Math.random() * (this.canvas.width - 40) + 20,
         y: Math.random() * (this.canvas.height - 40) + 20,
-        size: 30,
+        size: 15,
         color: '#FF4B4B',
         value: Math.floor(Math.random() * 100) + 50
       });
@@ -138,7 +148,7 @@ class PacmanGame {
       const dy = this.qubic.y - block.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
       
-      if (distance < this.qubic.size + block.size / 2) {
+      if (distance < this.qubic.size + block.size) {
         this.score += block.value;
         this.blocks.splice(i, 1);
         this.generateBlocks(1);
@@ -170,23 +180,23 @@ class PacmanGame {
       this.ctx.stroke();
     }
     
-    // Draw XMR blocks if image is loaded
+    // Draw XMR blocks
     if (this.xmrImageLoaded) {
       for (const block of this.blocks) {
         this.ctx.save();
         this.ctx.translate(block.x, block.y);
         this.ctx.drawImage(
           this.xmrImage,
-          -block.size,
-          -block.size,
-          block.size * 2,
-          block.size * 2
+          -block.size * 1.5,
+          -block.size * 1.5,
+          block.size * 3,
+          block.size * 3
         );
         this.ctx.restore();
       }
     }
     
-    // Draw Qubic if image is loaded
+    // Draw Qubic
     if (this.qubicImageLoaded) {
       this.ctx.save();
       this.ctx.translate(this.qubic.x, this.qubic.y);
@@ -199,10 +209,10 @@ class PacmanGame {
       
       this.ctx.drawImage(
         this.qubicImage,
-        -this.qubic.size,
-        -this.qubic.size,
-        this.qubic.size * 2,
-        this.qubic.size * 2
+        -this.qubic.size * 1.5,
+        -this.qubic.size * 1.5,
+        this.qubic.size * 3,
+        this.qubic.size * 3
       );
       this.ctx.restore();
     }
